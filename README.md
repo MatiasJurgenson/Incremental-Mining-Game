@@ -8,7 +8,7 @@ In the game repository, do
 ```
   $ cmake -B build
   $ cmake --build build
-  $ ./build/main
+  $ ./build/game
 ```
 
 ...
