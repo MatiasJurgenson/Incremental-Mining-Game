@@ -18,5 +18,7 @@ On Windows:
   $ ./build/windows/game
 ```
 
+The Windows preset requires CMake 4.5 or newer and Visual Studio 18 2026.
+
 To move around, use arrow keys or WASD.
 ...
