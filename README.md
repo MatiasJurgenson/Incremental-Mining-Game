@@ -4,11 +4,19 @@ A 2D mining game made for the course Computer Graphics (MTAT.03.015)
 
 ## Running the game
 
-In the game repository, do
+On Linux:
 ```
-  $ cmake -B build
-  $ cmake --build build
-  $ ./build/game
+  $ cmake --preset linux-config
+  $ cmake --build --preset linux
+  $ ./build/linux/game
 ```
 
+On Windows:
+```
+  $ cmake --preset windows-config
+  $ cmake --build --preset windows
+  $ ./build/windows/game
+```
+
+To move around, use arrow keys or WASD.
 ...

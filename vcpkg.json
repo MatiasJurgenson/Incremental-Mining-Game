@@ -1,0 +1,15 @@
+{
+  "dependencies": [
+    "glfw3",
+    "opengl",
+    "glew",
+    "glm"
+  ],
+  "builtin-baseline": "120deac3062162151622ca4860575a33844ba10b",
+  "overrides": [
+    { "name": "glfw3", "version": "3.4" },
+    { "name": "opengl", "version": "2022-12-04#3" },
+    { "name": "glew", "version": "2.2.0#6" },
+    { "name": "glm", "version": "1.0.1#3" }
+  ]
+}

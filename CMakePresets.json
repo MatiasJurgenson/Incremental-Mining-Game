@@ -1,0 +1,40 @@
+{
+    "version": 5,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 27,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "windows-config",
+            "displayName": "Windows configuration",
+            "generator": "Visual Studio 17 2022",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "binaryDir": "${sourceDir}/build/windows",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        },
+        {
+            "name": "linux-config",
+            "displayName": "Linux configuration",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/build/linux",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "windows",
+            "configurePreset": "windows-config",
+            "targets": ["game"]
+        },
+        {
+            "name": "linux",
+            "configurePreset": "linux-config",
+            "targets": ["game"]
+        }
+    ]
+}

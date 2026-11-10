@@ -3,10 +3,11 @@
 
 #include <vector>
 #include <random>
+#include <glm/glm.hpp>
 #include "utils.hpp"
 
-double uniform_random_nr(double, double);
-void generate_gradient_vectors(std::vector<Vec2>&, int, int);
-void generate_perlin_noise(std::vector<Vec2>&, float, float, std::vector<double>&, float, float);
+void generate_gradient_vectors(std::vector<glm::vec2>&, int, int);
+void generate_perlin_noise(std::vector<glm::vec2>&, float, float, std::vector<double>&, float, float);
+void generate_world(std::vector<double>&, unsigned int, unsigned int, unsigned int, unsigned int);
 
 #endif
