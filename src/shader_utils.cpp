@@ -7,6 +7,8 @@
 #include <vector>
 #include <cstring>
 #include <stdlib.h>
+
+#include "texture_util.h"
 using std::strcpy;
 
 
@@ -21,6 +23,12 @@ std::string get_file_contents(const char *filename) {
     if (in) return std::string((std::istreambuf_iterator<char>(in)),
                                 std::istreambuf_iterator<char>());
     else throw(std::runtime_error(std::string("Failed to read file ") + filename));
+}
+
+block_renderer::block_renderer(shader_prog& sp) : shader(sp) {
+    this->rocksTexture = load_texture(GL_TEXTURE_2D, GL_RGBA, TASK_ROOT_PATH "/data/Rocks.png");
+
+    this->init_block();
 }
 
 /**
@@ -185,10 +193,6 @@ GLuint shader_prog::attributeVectorVec3(const char* name, std::vector<glm::vec3>
 
 // ---------- rendering one block ----------
 
-block_renderer::block_renderer(shader_prog& sp) : shader(sp) {
-    this->init_block();
-}
-
 block_renderer::~block_renderer() {
     glDeleteVertexArrays(1, &this->blockVAO);
 }
@@ -226,7 +230,7 @@ void block_renderer::init_block() {
   glBindVertexArray(0);
 }
 
-void block_renderer::draw_block(glm::vec2 position, glm::vec2 size, float rotation) {
+void block_renderer::draw_block(glm::vec2 position, glm::vec2 size, float rotation, int area) {
   glm::mat4 model = glm::mat4(1.0f);
   model = glm::translate(model, glm::vec3(position, 0.0f));
 
@@ -238,6 +242,11 @@ void block_renderer::draw_block(glm::vec2 position, glm::vec2 size, float rotati
 
   this->shader.uniformMatrix4fv("model", model);
 
+  //bind the texture
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_2D, this->rocksTexture);
+  this->shader.uniform1i("blockTexture", 0);
+  this->shader.uniform1i("areaMask", area); // Pass the area mask to the shader
   glBindVertexArray(this->blockVAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
@@ -259,7 +268,34 @@ void draw_world(std::vector<double>& world,
       if (world[i * world_width + j] > drawing_threshold) {
         glm::vec2 position = glm::vec2(j * block_size, i * block_size);
         glm::vec2 size = glm::vec2(block_size);
-        block.draw_block(position, size, 0);
+
+        // This vector will hold the 3x3 area around the current block,
+        // where each element is 1 if the corresponding block is solid and 0 if it is empty.
+        std::vector<int> area;
+
+        for (int y = -1; y <= 1; ++y) {
+          for (int x = -1; x <= 1; ++x) {
+            int neighbor_x = j + x;
+            int neighbor_y = i + y;
+
+            if (neighbor_x >= 0 && neighbor_x < world_width &&
+                neighbor_y >= 0 && neighbor_y < world_height) {
+              area.push_back(world[neighbor_y * world_width + neighbor_x] > drawing_threshold ? 1 : 0);
+            } else {
+              area.push_back(1); // Treat out-of-bounds neighbors as solid blocks
+            }
+          }
+        }
+
+        int areaMask = 0;
+
+        for (int i = 0; i < 9; ++i) {
+            if (area[i] != 0) {
+                areaMask |= (1 << i);
+            }
+        }
+
+        block.draw_block(position, size, 0, areaMask);
       }
     }
   }

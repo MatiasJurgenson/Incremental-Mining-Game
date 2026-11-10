@@ -43,11 +43,12 @@ class block_renderer {
   private:
     shader_prog& shader;
     GLuint blockVAO;
+    GLuint rocksTexture;
     void init_block();
   public:
     block_renderer(shader_prog&);
     ~block_renderer();
-    void draw_block(glm::vec2, glm::vec2, float);
+    void draw_block(glm::vec2, glm::vec2, float, int);
 };
 
 // ---------- rendering one block ----------
