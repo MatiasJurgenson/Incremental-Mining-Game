@@ -24,12 +24,13 @@ namespace {
 
         if (areaMask == 511) return {1, 1}; // void
         if (areaMask == 16) return {4, 2}; // solid block
+        if (areaMask == 186) return {9, 0}; // x tile
 
         // corner cases
-        if (bottom && right && bottomright && !left && !top) return {0, 0};
-        if (top && left && topleft && !right && !bottom) return {2, 2};
-        if (bottom && left && bottomleft && !right && !top) return {2, 0};
-        if (top && right && topright && !left && !bottom) return {0, 2};
+        if (bottom && right && bottomright && !left && !top) return {0, 0}; // top left corner
+        if (top && left && topleft && !right && !bottom) return {2, 2}; // bottom right corner
+        if (bottom && left && bottomleft && !right && !top) return {2, 0}; // bottom left corner
+        if (top && right && topright && !left && !bottom) return {0, 2}; // top right corner
 
         // edge cases
         if (!top && bottom && bottomleft && bottomright && left && right) return {1, 0}; // up edge
@@ -59,6 +60,39 @@ namespace {
         if (areaMask == 251) return {6, 1}; // inverted T right
         if (areaMask == 191) return {7, 1}; // inverted T down
 
+        // 2 corner tiles
+        if (areaMask == 443) return {8, 1}; // 2 corner
+        if (areaMask == 254) return {8, 2}; // 2 corner flipped
+
+        // T tiles
+        if (left && right && top && !bottom && !topleft && !topright) return {10, 2}; // Top
+        if (top && bottom && left && !right && !topleft && !bottomleft) return {11, 2}; // left
+        if (top && bottom && right && !left && !topright && !bottomright) return {10, 1}; // right
+        if (left && right && bottom && !top && !bottomleft && !bottomright) return {11, 1}; // down
+
+        // T tiles with one void corner
+        if (left && right && top && !bottom && !topleft && topright) return {1, 4}; // Top with right void
+        if (top && bottom && left && !right && !bottomleft && topleft) return {0, 4}; // left with top void
+        if (top && bottom && right && !left && !topright && bottomright) return {1, 5}; // right with down void
+        if (left && right && bottom && !top && !bottomright && bottomleft) return {0, 5}; // down with right void
+        
+        if (left && right && top && !bottom && topleft && !topright) return {4, 4}; // Top with left void
+        if (top && bottom && left && !right && bottomleft && !topleft) return {3, 4}; // left with down void
+        if (top && bottom && right && !left && topright && !bottomright) return {4, 5}; // right with top void
+        if (left && right && bottom && !top && bottomright && !bottomleft) return {3, 5}; // down with left void
+
+        // L tils
+        if (bottom && right && !bottomright && !left && !top) return {6, 4}; // top left
+        if (top && left && !topleft && !right && !bottom) return {7, 5}; // bottom right   
+        if (bottom && left && !bottomleft && !right && !top) return {7, 4}; // top right
+        if (top && right && !topright && !left && !bottom) return {6, 5}; // bottom left
+        
+        // 3 corner tiles
+        if (areaMask == 187) return {9, 4}; // void tile top left
+        if (areaMask == 190) return {10, 4}; // void tile top right
+        if (areaMask == 250) return {9, 5}; // void tile down left
+        if (areaMask == 442) return {10, 5}; // void tile down right
+        
         return {3, 2}; // missing tile
     }
 }
