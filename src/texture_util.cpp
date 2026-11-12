@@ -12,7 +12,6 @@ GLuint load_texture(GLenum target, GLint internalFormat, const char* filename) {
     int height = 0;
     int channels = 0;
 
-    stbi_set_flip_vertically_on_load(1);
     unsigned char* pixels = stbi_load(filename, &width, &height, &channels, 0);
     if (pixels == nullptr) {
         throw std::runtime_error(

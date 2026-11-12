@@ -11,6 +11,58 @@
 #include "texture_util.h"
 using std::strcpy;
 
+namespace {
+    glm::ivec2 block_tile(int areaMask) {
+        const bool topleft = (areaMask & (1 << 0)) != 0;
+        const bool top = (areaMask & (1 << 1)) != 0;
+        const bool topright = (areaMask & (1 << 2)) != 0;
+        const bool left = (areaMask & (1 << 3)) != 0;
+        const bool right = (areaMask & (1 << 5)) != 0;
+        const bool bottomleft = (areaMask & (1 << 6)) != 0;
+        const bool bottom = (areaMask & (1 << 7)) != 0;
+        const bool bottomright = (areaMask & (1 << 8)) != 0;
+
+        if (areaMask == 511) return {1, 1}; // void
+        if (areaMask == 16) return {4, 2}; // solid block
+
+        // corner cases
+        if (bottom && right && bottomright && !left && !top) return {0, 0};
+        if (top && left && topleft && !right && !bottom) return {2, 2};
+        if (bottom && left && bottomleft && !right && !top) return {2, 0};
+        if (top && right && topright && !left && !bottom) return {0, 2};
+
+        // edge cases
+        if (!top && bottom && bottomleft && bottomright && left && right) return {1, 0}; // up edge
+        if (!left && right && bottomright && topright && top && bottom) return {0, 1}; // left edge
+        if (!right && left && bottomleft && topleft && top && bottom) return {2, 1}; // right edge
+        if (!bottom && top && topleft && topright && left && right) return {1, 2}; // down edge
+
+        // invertred corner cases
+        if (areaMask == 510) return {4, 1}; // empty tile top left
+        if (areaMask == 507) return {3, 1}; // empty tile top right
+        if (areaMask == 447) return {4, 0}; // empty tile down left
+        if (areaMask == 255) return {3, 0}; // empty tile down right
+
+        // pillars
+        if (right && left && !bottom && !top) return {7, 0}; // pillar sideways
+        if (bottom && top && !right && !left) return {5, 1}; // pillar up
+
+        // pillar edge cases
+        if (bottom && !top && !right && !left) return {5, 0}; // pillar up
+        if (right && !left && !top && !bottom) return {6, 0}; // pillar left
+        if (left && !right && !top && !bottom) return {8, 0}; // pillar right
+        if (top && !right && !left && !bottom) return {5, 2}; // pillar down
+
+        //inverted T tiles
+        if (areaMask == 506) return {6, 2}; // inverted T up
+        if (areaMask == 446) return {7, 2}; // inverted T left
+        if (areaMask == 251) return {6, 1}; // inverted T right
+        if (areaMask == 191) return {7, 1}; // inverted T down
+
+        return {3, 2}; // missing tile
+    }
+}
+
 
 // ---------- code taken from labs ----------
 
@@ -246,7 +298,9 @@ void block_renderer::draw_block(glm::vec2 position, glm::vec2 size, float rotati
   glActiveTexture(GL_TEXTURE0);
   glBindTexture(GL_TEXTURE_2D, this->rocksTexture);
   this->shader.uniform1i("blockTexture", 0);
-  this->shader.uniform1i("areaMask", area); // Pass the area mask to the shader
+  const glm::ivec2 tile = block_tile(area);
+  this->shader.uniform1i("tileIndexX", tile.x);
+  this->shader.uniform1i("tileIndexY", tile.y);
   glBindVertexArray(this->blockVAO);
   glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);

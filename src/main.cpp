@@ -12,8 +12,8 @@
 #define WORLD_HEIGHT 256
 #define PERLIN_WIDTH WORLD_WIDTH / 5
 #define PERLIN_HEIGHT WORLD_HEIGHT / 5
-#define WINDOW_WIDTH 640
-#define WINDOW_HEIGHT 480
+#define WINDOW_WIDTH 1280
+#define WINDOW_HEIGHT 960
 
 #define CONCAT_PATHS(A, B) A "/" B
 #define ADD_ROOT(B) CONCAT_PATHS(TASK_ROOT_PATH, B)
@@ -123,7 +123,7 @@ int main(int argc, char* argv[]) {
   generate_world(world, WORLD_WIDTH, WORLD_HEIGHT, PERLIN_WIDTH, PERLIN_HEIGHT);
   block_renderer block = block_renderer(shader);
 
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClearColor(0.0f, 1.0f, 0.0f, 1.0f); // background color
   double previous_time = glfwGetTime();
   // main game loop
   while (!glfwWindowShouldClose(win)) {
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
     shader.uniformMatrix4fv("projection", main_camera->projection);
     shader.uniformMatrix4fv("view", main_camera->view);
 
-    draw_world(world, WORLD_WIDTH, WORLD_HEIGHT, block, 10.f, .5f);
+    draw_world(world, WORLD_WIDTH, WORLD_HEIGHT, block, 20.f, .5f);
     glfwSwapBuffers(win);
     glfwPollEvents();
     previous_time = current_time;
