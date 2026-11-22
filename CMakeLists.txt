@@ -24,6 +24,10 @@ add_executable(game
   src/utils.cpp
   src/shader_utils.cpp
   src/texture_util.cpp
+  src/geometry.cpp
+  src/character.cpp
+  src/characterRenderer.cpp
+  src/collision.cpp
 )
 
 target_compile_definitions(game PRIVATE

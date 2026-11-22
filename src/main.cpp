@@ -1,3 +1,4 @@
+#include <iostream>
 #include <vector>
 #include <map>
 #include <GL/glew.h>
@@ -6,6 +7,11 @@
 
 #include "perlin.hpp"
 #include "shader_utils.hpp"
+
+#include "geometry.hpp"
+#include "character.hpp"
+#include "characterRenderer.hpp"
+#include "collision.hpp"
 
 // for now define these as macros
 #define WORLD_WIDTH  64
@@ -48,19 +54,36 @@ void init_keyboard(std::map<int, bool>& keyboard) {
   keyboard.insert(std::make_pair(GLFW_KEY_D, false));
 }
 
-static void input(float delta_time, float speed, Camera* camera) {
-  if (keyboard.at(GLFW_KEY_UP) || keyboard.at(GLFW_KEY_W)) {
+static void input(float delta_time, float speed, Camera* camera, Character& character) {
+  // Camera
+  if (keyboard.at(GLFW_KEY_UP)) {
     camera->position.y -= speed * delta_time;
   }
-  if (keyboard.at(GLFW_KEY_DOWN) || keyboard.at(GLFW_KEY_S)) {
+  if (keyboard.at(GLFW_KEY_DOWN)) {
     camera->position.y += speed * delta_time;
   }
-  if (keyboard.at(GLFW_KEY_LEFT) || keyboard.at(GLFW_KEY_A)) {
+  if (keyboard.at(GLFW_KEY_LEFT)) {
     camera->position.x -= speed * delta_time;
   }
-  if (keyboard.at(GLFW_KEY_RIGHT) || keyboard.at(GLFW_KEY_D)) {
+  if (keyboard.at(GLFW_KEY_RIGHT)) {
     camera->position.x += speed * delta_time;
   }
+
+  // Character
+  glm::vec2 direction(0.0f);
+  if (keyboard.at(GLFW_KEY_W)) {
+    character.jump();
+  }
+  if (keyboard.at(GLFW_KEY_A)) {
+    direction.x -= 1.0f;
+  }
+  //if (keyboard.at(GLFW_KEY_S)) {
+    //direction.y +=1.0f;
+  //}
+  if (keyboard.at(GLFW_KEY_D)) {
+    direction.x += 1.0f;
+  }
+  character.move(direction);
 }
 
 void update_camera(float delta_time, Camera* camera) {
@@ -123,6 +146,15 @@ int main(int argc, char* argv[]) {
   generate_world(world, WORLD_WIDTH, WORLD_HEIGHT, PERLIN_WIDTH, PERLIN_HEIGHT);
   block_renderer block = block_renderer(shader);
 
+  // Character
+  Quad charModel = createQuad();
+  Character character = Character(glm::vec2(640.0f, 50.0f));
+  CharacterRenderer renderChar = CharacterRenderer(shader, charModel);
+  Collision playerCollision = {
+    character.position,
+    character.size
+  };
+
   glClearColor(0.0f, 1.0f, 0.0f, 1.0f); // background color
   double previous_time = glfwGetTime();
   // main game loop
@@ -131,7 +163,7 @@ int main(int argc, char* argv[]) {
     double current_time = glfwGetTime();
     double delta_time = current_time - previous_time;
 
-    input(delta_time, 300.f, main_camera);
+    input(delta_time, 300.f, main_camera, character);
 
     update_camera(delta_time, main_camera);
 
@@ -139,11 +171,27 @@ int main(int argc, char* argv[]) {
     shader.uniformMatrix4fv("view", main_camera->view);
 
     draw_world(world, WORLD_WIDTH, WORLD_HEIGHT, block, 20.f, .5f);
+
+    // Character
+    character.update(delta_time);
+    
+    // Collision: x-axis
+    character.position.x += character.velocity.x * delta_time;
+    resolveCollision(character, playerCollision, world, 20.0f, WORLD_WIDTH, WORLD_HEIGHT, Axis::X);
+
+    // Collision: y-axis
+    character.position.y += character.velocity.y * delta_time;
+    character.onGround = false;
+    resolveCollision(character, playerCollision, world, 20.0f, WORLD_WIDTH, WORLD_HEIGHT, Axis::Y);
+
+    renderChar.draw(character);
+
     glfwSwapBuffers(win);
     glfwPollEvents();
     previous_time = current_time;
   }
 
+  destroyQuad(charModel);
   glfwTerminate();
   exit(EXIT_SUCCESS);
 }
